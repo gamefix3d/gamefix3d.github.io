@@ -76,7 +76,7 @@
         transition: transform .9s ease;
       }
       .card:hover .art::after { transform: translateX(60%) rotate(20deg); }
-      .art .cube-img { position: absolute; left: 50%; top: 50%; height: 88%; width: auto; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 24px rgba(0,0,0,.55)); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+      .art .cube-img { position: absolute; left: 50%; top: 50%; height: 88%; width: auto; max-width: 92%; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 24px rgba(0,0,0,.55)); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
       .card:hover .art .cube-img { transform: translate(-50%, -50%) scale(1.05) rotate(-3deg); }
             .sheen { position: absolute; inset: 0; opacity: .25; mix-blend-mode: overlay; pointer-events: none;
         background: radial-gradient(circle at var(--mx) var(--my), #fff, transparent 40%); }
@@ -131,7 +131,7 @@
 
     <footer>Open source under MIT · <a href="https://github.com/gamefix3d" style="color:inherit">github.com/gamefix3d</a></footer>
 
-    <template id="art-rubicube3d"><img class="cube-img" src="./art/rubicube3d.png" alt="Rubicube 3D cube" width="452" height="720" loading="lazy" /></template>
+    <template id="art-rubicube3d"><img class="cube-img" src="./art/rubicube3d.png" alt="Rubicube 3D cube" width="452" height="720" loading="lazy" decoding="async" /></template>
 
     <script type="module">
       const grid = document.getElementById('games');
