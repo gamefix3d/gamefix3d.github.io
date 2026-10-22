@@ -1,17 +1,23 @@
-// Builds each game listed in games.json and writes it to public/games/<id>/, so
-// Vite copies it into dist/ with the shell. Each game is cloned by the publish
-// workflow into games-src/<id>/ beforehand. Each game is built with VITE_BASE set
-// to its own subpath, so asset URLs resolve on Pages.
+// Builds each game listed in games.json into public/<id>/, so Vite copies it to
+// the site root (https://gamefix3d.github.io/<id>/). The publish workflow clones
+// each game into games-src/<id>/ beforehand. Each game is built with VITE_BASE set
+// to its own root path so asset URLs resolve.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
 const { games } = JSON.parse(fs.readFileSync(path.join(root, 'games.json'), 'utf8'));
-const out = path.join(root, 'public', 'games');
+const publicDir = path.join(root, 'public');
+const RESERVED = new Set(['assets', 'games.json', 'index.html']);
 
-fs.rmSync(out, { recursive: true, force: true });
-fs.mkdirSync(out, { recursive: true });
+for (const game of games) {
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(game.id)) throw new Error(`Invalid game id: ${game.id}`);
+  if (RESERVED.has(game.id)) throw new Error(`Game id collides with a shell path: ${game.id}`);
+}
+
+fs.rmSync(publicDir, { recursive: true, force: true });
+fs.mkdirSync(publicDir, { recursive: true });
 
 for (const game of games) {
   const src = path.join(root, 'games-src', game.id);
@@ -22,10 +28,10 @@ for (const game of games) {
   execFileSync('npm', ['run', 'build'], {
     cwd: src,
     stdio: 'inherit',
-    env: { ...process.env, VITE_BASE: `/games/${game.id}/` },
+    env: { ...process.env, VITE_BASE: `/${game.id}/` },
   });
-  fs.cpSync(path.join(src, 'dist'), path.join(out, game.id), { recursive: true });
+  fs.cpSync(path.join(src, 'dist'), path.join(publicDir, game.id), { recursive: true });
 }
 
-fs.writeFileSync(path.join(out, 'games.json'), JSON.stringify(games, null, 2));
-console.log(`\nBuilt ${games.length} game(s) into public/games`);
+fs.writeFileSync(path.join(publicDir, 'games.json'), JSON.stringify(games, null, 2));
+console.log(`\nBuilt ${games.length} game(s) into the site root`);

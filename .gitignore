@@ -1,7 +1,7 @@
 node_modules/
 dist/
 games-src/
-public/games/
+public/
 .env
 .env.*
 !.env.example

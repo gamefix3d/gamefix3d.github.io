@@ -3,40 +3,229 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GameFix3D</title>
-    <meta name="description" content="GameFix3D: a collection of browser games." />
+    <title>GameFix3D · Play</title>
+    <meta name="description" content="GameFix3D: a collection of premium browser games." />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b0b12'/%3E%3Cpath d='M4 4h12v12H4z' fill='%23d7263d'/%3E%3Cpath d='M16 4h12v12H16z' fill='%2312b76a'/%3E%3Cpath d='M4 16h12v12H4z' fill='%23fcd34d'/%3E%3Cpath d='M16 16h12v12H16z' fill='%233b82f6'/%3E%3C/svg%3E" />
     <style>
-      body { margin: 0; font-family: system-ui, sans-serif; background: #07070d; color: #f4f4f5; }
-      main { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
-      h1 { font-size: 2rem; margin: 0 0 8px; }
-      p.lead { color: #a1a1aa; margin: 0 0 32px; }
-      .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-      a.card { display: block; padding: 20px; border-radius: 16px; text-decoration: none; color: inherit;
-        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: transform .2s, border-color .2s; }
-      a.card:hover { transform: translateY(-2px); border-color: #a78bfa; }
-      a.card h2 { margin: 0 0 6px; font-size: 1.1rem; }
-      a.card p { margin: 0; color: #a1a1aa; font-size: .9rem; }
+      :root { color-scheme: dark; --ink: #f4f4f5; --muted: #a1a1aa; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; color: var(--ink);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: #07070d; overflow-x: hidden;
+      }
+      /* Ambient background */
+      .aurora { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+      .aurora span {
+        position: absolute; width: 50vw; height: 50vw; min-width: 320px; min-height: 320px;
+        border-radius: 50%; filter: blur(90px); opacity: .35;
+        animation: drift 24s ease-in-out infinite alternate;
+      }
+      .aurora span:nth-child(1) { background: #7c3aed; top: -20%; left: -10%; }
+      .aurora span:nth-child(2) { background: #db2777; bottom: -25%; right: -12%; animation-delay: -8s; }
+      .aurora span:nth-child(3) { background: #0ea5e9; top: 35%; left: 40%; opacity: .18; animation-delay: -15s; }
+      .grain {
+        position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .04;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      }
+
+      header { max-width: 1080px; margin: 0 auto; padding: 56px 24px 8px; text-align: center; }
+      .eyebrow {
+        display: inline-flex; gap: 8px; align-items: center; padding: 6px 14px; border-radius: 999px;
+        font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #d4d4d8;
+        background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      }
+      .eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px #34d399; animation: pulse 2s infinite; }
+      h1 {
+        margin: 18px 0 10px; font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; letter-spacing: -.03em;
+        background: linear-gradient(120deg, #fff 20%, #c4b5fd 55%, #f9a8d4 90%); -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .lead { margin: 0 auto; max-width: 560px; color: var(--muted); line-height: 1.6; }
+
+      main { max-width: 1080px; margin: 40px auto 80px; padding: 0 24px; }
+      .grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+      /* Game card */
+      .card {
+        --accent: #8b5cf6; --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%;
+        position: relative; display: flex; flex-direction: column; text-decoration: none; color: inherit;
+        border-radius: 24px; overflow: hidden; isolation: isolate;
+        background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+        border: 1px solid rgba(255,255,255,.1);
+        box-shadow: 0 30px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.07);
+        transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
+        transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .35s;
+        opacity: 0; animation: reveal .7s cubic-bezier(.2,.8,.2,1) forwards;
+        animation-delay: calc(var(--i, 0) * 120ms + 120ms);
+      }
+      .card::before { /* cursor-following glow */
+        content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .4s;
+        background: radial-gradient(420px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 35%, transparent), transparent 60%);
+      }
+      .card:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 40px 80px -30px color-mix(in srgb, var(--accent) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.1); }
+      .card:hover::before { opacity: 1; }
+      .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+      .art {
+        position: relative; height: 210px; overflow: hidden;
+        background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 55%, #000), #0b0b14 75%);
+      }
+      .art::after { /* shine sweep on hover */
+        content: ""; position: absolute; inset: -50% -120%; transform: translateX(-60%) rotate(20deg);
+        background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%);
+        transition: transform .9s ease;
+      }
+      .card:hover .art::after { transform: translateX(60%) rotate(20deg); }
+      .art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .cube-float { transform-origin: 50% 50%; animation: float 6s ease-in-out infinite; }
+      .cube-spin { transform-box: fill-box; transform-origin: center; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+      .card:hover .cube-spin { transform: rotate(-30deg) scale(1.06); }
+      .sheen { position: absolute; inset: 0; opacity: .25; mix-blend-mode: overlay; pointer-events: none;
+        background: radial-gradient(circle at var(--mx) var(--my), #fff, transparent 40%); }
+
+      .body { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+      .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      h2 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -.01em; }
+      .arrow {
+        width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0;
+        background: color-mix(in srgb, var(--accent) 22%, transparent); color: #fff;
+        transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s;
+      }
+      .card:hover .arrow { transform: translateX(3px) rotate(-45deg); background: var(--accent); }
+      .blurb { margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.55; }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+      .tag { font-size: 11px; font-weight: 600; letter-spacing: .04em; padding: 4px 10px; border-radius: 999px;
+        color: color-mix(in srgb, var(--accent) 60%, #fff); background: color-mix(in srgb, var(--accent) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+
+      .empty, .error { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 60px 0; }
+      .skeleton { height: 360px; border-radius: 24px; background: linear-gradient(100deg, rgba(255,255,255,.04) 30%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.04) 70%) ; background-size: 200% 100%; animation: shimmer 1.6s infinite; border: 1px solid rgba(255,255,255,.06); }
+
+      footer { text-align: center; color: #52525b; font-size: 13px; padding: 0 24px 40px; }
+
+      @keyframes drift { to { transform: translate(6vw, 4vh) scale(1.12); } }
+      @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+      @keyframes reveal { from { opacity: 0; transform: perspective(900px) translateY(18px) scale(.98); } to { opacity: 1; transform: perspective(900px) translateY(0) scale(1); } }
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+      @keyframes shimmer { to { background-position: -200% 0; } }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+      }
     </style>
   </head>
   <body>
-    <main>
+    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header>
+      <span class="eyebrow"><i></i> Games · Live</span>
       <h1>GameFix3D</h1>
-      <p class="lead">Browser games, built and published automatically.</p>
-      <div id="games" class="grid" aria-live="polite"></div>
+      <p class="lead">Premium browser games, built and published automatically.</p>
+    </header>
+
+    <main>
+      <div id="games" class="grid" aria-live="polite">
+        <div class="skeleton" aria-hidden="true"></div>
+        <div class="skeleton" aria-hidden="true"></div>
+      </div>
     </main>
+
+    <footer>Open source under MIT · <a href="https://github.com/gamefix3d" style="color:inherit">github.com/gamefix3d</a></footer>
+
+    <template id="art-rubicube3d">
+      <svg viewBox="0 0 300 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff" stop-opacity=".35" />
+            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="150" cy="105" r="95" fill="url(#glow)" />
+        <ellipse cx="150" cy="190" rx="90" ry="10" fill="#000" opacity=".4" />
+        <g class="cube-float">
+          <g class="cube-spin" transform="translate(150 105) rotate(-20) skewY(-6)">
+            <!-- top face -->
+            <polygon points="-50,-30 0,-55 50,-30 0,-5" fill="#f5f5f7" />
+            <!-- left face -->
+            <polygon points="-50,-30 0,-5 0,55 -50,30" fill="#12b76a" />
+            <!-- right face -->
+            <polygon points="0,-5 50,-30 50,30 0,55" fill="#d7263d" />
+            <!-- grid lines -->
+            <g stroke="#0b0b12" stroke-width="2.5" stroke-linejoin="round" fill="none" opacity=".85">
+              <path d="M-16.7,-46.7 L16.7,-13.3 M16.7,-46.7 L-16.7,-13.3 M-33.3,-38.3 L33.3,-21.7 M33.3,-38.3 L-33.3,-21.7 M-33.3,-21.7 L-33.3,38.3 M16.7,-13.3 L16.7,46.7 M-16.7,-13.3 L-16.7,46.7 M33.3,-21.7 L33.3,38.3" />
+            </g>
+          </g>
+        </g>
+        <g fill="#fff" opacity=".9">
+          <circle cx="40" cy="40" r="1.6" />
+          <circle cx="262" cy="58" r="1.2" />
+          <circle cx="236" cy="168" r="1.8" />
+          <circle cx="58" cy="164" r="1.1" />
+        </g>
+      </svg>
+    </template>
+
     <script type="module">
-      const res = await fetch('./games/games.json');
-      const games = await res.json();
       const grid = document.getElementById('games');
-      for (const g of games) {
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+      function art(id) {
+        const tpl = document.getElementById(`art-${id}`);
+        return tpl ? tpl.innerHTML : '';
+      }
+
+      function renderCard(g, i) {
         const a = document.createElement('a');
         a.className = 'card';
-        a.href = `./games/${g.id}/`;
-        a.innerHTML = `<h2></h2><p></p>`;
-        a.querySelector('h2').textContent = g.title;
-        a.querySelector('p').textContent = g.blurb;
-        grid.appendChild(a);
+        a.href = `./${encodeURIComponent(g.id)}/`;
+        a.style.setProperty('--i', i);
+        a.style.setProperty('--accent', /^#[0-9a-f]{3,8}$/i.test(g.accent) ? g.accent : '#8b5cf6');
+        a.setAttribute('aria-label', `Play ${g.title}`);
+        const tags = (g.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join('');
+        a.innerHTML = `
+          <div class="art">${art(g.id)}<div class="sheen"></div></div>
+          <div class="body">
+            <div class="title-row"><h2>${esc(g.title)}</h2><span class="arrow" aria-hidden="true">→</span></div>
+            <p class="blurb">${esc(g.blurb)}</p>
+            <div class="tags">${tags}</div>
+          </div>`;
+        return a;
+      }
+
+      // Pointer-driven 3D tilt and glow.
+      function attachTilt(card) {
+        const max = 8;
+        card.addEventListener('pointermove', (e) => {
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          card.style.setProperty('--ry', `${(x - 0.5) * max * 2}deg`);
+          card.style.setProperty('--rx', `${(0.5 - y) * max * 2}deg`);
+          card.style.setProperty('--mx', `${x * 100}%`);
+          card.style.setProperty('--my', `${y * 100}%`);
+        });
+        card.addEventListener('pointerleave', () => {
+          card.style.setProperty('--rx', '0deg');
+          card.style.setProperty('--ry', '0deg');
+        });
+      }
+
+      try {
+        const res = await fetch('./games.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const games = await res.json();
+        grid.replaceChildren();
+        if (!games.length) {
+          grid.innerHTML = '<p class="empty">No games published yet.</p>';
+        }
+        games.forEach((g, i) => {
+          const card = renderCard(g, i);
+          grid.appendChild(card);
+          attachTilt(card);
+        });
+      } catch (err) {
+        grid.innerHTML = `<p class="error">Couldn't load games (${esc(err.message)}).</p>`;
       }
     </script>
   </body>
