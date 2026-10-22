@@ -76,11 +76,9 @@
         transition: transform .9s ease;
       }
       .card:hover .art::after { transform: translateX(60%) rotate(20deg); }
-      .art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-      .cube-float { transform-origin: 50% 50%; animation: float 6s ease-in-out infinite; }
-      .cube-spin { transform-box: fill-box; transform-origin: center; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
-      .card:hover .cube-spin { transform: rotate(-30deg) scale(1.06); }
-      .sheen { position: absolute; inset: 0; opacity: .25; mix-blend-mode: overlay; pointer-events: none;
+      .art .cube-img { position: absolute; left: 50%; top: 50%; height: 88%; width: auto; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 24px rgba(0,0,0,.55)); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+      .card:hover .art .cube-img { transform: translate(-50%, -50%) scale(1.05) rotate(-3deg); }
+            .sheen { position: absolute; inset: 0; opacity: .25; mix-blend-mode: overlay; pointer-events: none;
         background: radial-gradient(circle at var(--mx) var(--my), #fff, transparent 40%); }
 
       .body { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
@@ -133,38 +131,7 @@
 
     <footer>Open source under MIT · <a href="https://github.com/gamefix3d" style="color:inherit">github.com/gamefix3d</a></footer>
 
-    <template id="art-rubicube3d">
-      <svg viewBox="0 0 300 210" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#fff" stop-opacity=".35" />
-            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
-          </radialGradient>
-        </defs>
-        <circle cx="150" cy="105" r="95" fill="url(#glow)" />
-        <ellipse cx="150" cy="190" rx="90" ry="10" fill="#000" opacity=".4" />
-        <g class="cube-float">
-          <g class="cube-spin" transform="translate(150 105) rotate(-20) skewY(-6)">
-            <!-- top face -->
-            <polygon points="-50,-30 0,-55 50,-30 0,-5" fill="#f5f5f7" />
-            <!-- left face -->
-            <polygon points="-50,-30 0,-5 0,55 -50,30" fill="#12b76a" />
-            <!-- right face -->
-            <polygon points="0,-5 50,-30 50,30 0,55" fill="#d7263d" />
-            <!-- grid lines -->
-            <g stroke="#0b0b12" stroke-width="2.5" stroke-linejoin="round" fill="none" opacity=".85">
-              <path d="M-16.7,-46.7 L16.7,-13.3 M16.7,-46.7 L-16.7,-13.3 M-33.3,-38.3 L33.3,-21.7 M33.3,-38.3 L-33.3,-21.7 M-33.3,-21.7 L-33.3,38.3 M16.7,-13.3 L16.7,46.7 M-16.7,-13.3 L-16.7,46.7 M33.3,-21.7 L33.3,38.3" />
-            </g>
-          </g>
-        </g>
-        <g fill="#fff" opacity=".9">
-          <circle cx="40" cy="40" r="1.6" />
-          <circle cx="262" cy="58" r="1.2" />
-          <circle cx="236" cy="168" r="1.8" />
-          <circle cx="58" cy="164" r="1.1" />
-        </g>
-      </svg>
-    </template>
+    <template id="art-rubicube3d"><img class="cube-img" src="./art/rubicube3d.png" alt="Rubicube 3D cube" width="452" height="720" loading="lazy" /></template>
 
     <script type="module">
       const grid = document.getElementById('games');
