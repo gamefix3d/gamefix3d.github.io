@@ -4,8 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GameFix3D</title>
+    <meta name="description" content="GameFix3D: a collection of browser games." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b0b12'/%3E%3Cpath d='M4 4h12v12H4z' fill='%23d7263d'/%3E%3Cpath d='M16 4h12v12H16z' fill='%2312b76a'/%3E%3Cpath d='M4 16h12v12H4z' fill='%23fcd34d'/%3E%3Cpath d='M16 16h12v12H16z' fill='%233b82f6'/%3E%3C/svg%3E" />
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; background: #07070d; color: #f4f4f5; }
+      main { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
+      h1 { font-size: 2rem; margin: 0 0 8px; }
+      p.lead { color: #a1a1aa; margin: 0 0 32px; }
+      .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+      a.card { display: block; padding: 20px; border-radius: 16px; text-decoration: none; color: inherit;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: transform .2s, border-color .2s; }
+      a.card:hover { transform: translateY(-2px); border-color: #a78bfa; }
+      a.card h2 { margin: 0 0 6px; font-size: 1.1rem; }
+      a.card p { margin: 0; color: #a1a1aa; font-size: .9rem; }
+    </style>
   </head>
   <body>
-    <h1>GameFix3D</h1>
+    <main>
+      <h1>GameFix3D</h1>
+      <p class="lead">Browser games, built and published automatically.</p>
+      <div id="games" class="grid" aria-live="polite"></div>
+    </main>
+    <script type="module">
+      const res = await fetch('./games/games.json');
+      const games = await res.json();
+      const grid = document.getElementById('games');
+      for (const g of games) {
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = `./games/${g.id}/`;
+        a.innerHTML = `<h2></h2><p></p>`;
+        a.querySelector('h2').textContent = g.title;
+        a.querySelector('p').textContent = g.blurb;
+        grid.appendChild(a);
+      }
+    </script>
   </body>
 </html>

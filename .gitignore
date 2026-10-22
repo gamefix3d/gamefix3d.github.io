@@ -1,0 +1,4 @@
+node_modules/
+dist/
+games-src/
+public/games/

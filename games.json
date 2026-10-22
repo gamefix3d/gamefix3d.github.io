@@ -1,0 +1,5 @@
+{
+  "games": [
+    { "id": "rubicube3d", "repo": "gamefix3d/rubicube3d", "ref": "main", "title": "Rubicube 3D", "blurb": "Solve, scramble and learn the Rubik's Cube in 3D." }
+  ]
+}

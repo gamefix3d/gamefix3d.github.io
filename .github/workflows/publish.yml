@@ -1,0 +1,49 @@
+name: Build and publish shell and games
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [game-updated]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check out games from private repos
+        run: |
+          set -e
+          node -e "for (const g of require('./games.json').games) console.log(g.id + ' ' + g.repo + ' ' + g.ref)" | while read id repo ref; do
+            git clone --depth 1 --branch "$ref" "https://x-access-token:${GAMES_TOKEN}@github.com/${repo}.git" "games-src/$id"
+          done
+        env:
+          GAMES_TOKEN: ${{ secrets.GAMES_TOKEN }}
+
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
