@@ -16,8 +16,11 @@ for (const game of games) {
   if (RESERVED.has(game.id)) throw new Error(`Game id collides with a shell path: ${game.id}`);
 }
 
-fs.rmSync(publicDir, { recursive: true, force: true });
+// Only the generated game folders are cleared. Static assets live in static/ and
+// are copied in below, so the build never deletes them.
+for (const game of games) fs.rmSync(path.join(publicDir, game.id), { recursive: true, force: true });
 fs.mkdirSync(publicDir, { recursive: true });
+fs.cpSync(path.join(root, 'static'), publicDir, { recursive: true });
 
 for (const game of games) {
   const src = path.join(root, 'games-src', game.id);
